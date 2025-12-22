@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { EyeOff,Eye,Lock, Mail, MessageSquare ,User, Loader, Loader2} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AuthImagePatern from '../components/AuthImagePattern';
+import toast from 'react-hot-toast';
 
 function SignupPage() {
 
@@ -16,11 +17,20 @@ function SignupPage() {
   const { signup, isSigninUp} = useAuthStore()
 
   const validator = () => {
+      if(!formData.fullName.trim()) return toast.error("Full name is required")
+      if(!formData.email.trim()) return toast.error("Enter your email");
+      if(!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Enter your email correctly");
+      if(!formData.password.trim()) return toast.error("Enter a password")  
+      if(formData.password.length < 6) return toast.error("Enter a password more than 6 character ")   
 
+      return true;  
   }
 
   const handleSubmit = (e) => {
-       e.preventDefault()
+       e.preventDefault();
+
+       const success = validator()
+       if(success === true) signup(formData);
   }
 
   return (
@@ -76,7 +86,7 @@ function SignupPage() {
            </div>
            <div className='form-control'>
              <label className='label'>
-              <span className='label-text font-medium'>Email</span>
+              <span className='label-text font-medium'>Password</span>
             </label>
             <div className='relative'>
                 <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>

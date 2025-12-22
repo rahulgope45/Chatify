@@ -9,6 +9,7 @@ import SettingsPage from './pages/SettingsPage'
 import { useAuthStore } from './store/useAuthStore'
 import { useEffect } from 'react'
 import {Loader} from 'lucide-react'
+import {Toaster} from 'react-hot-toast'
 
 function App() {
    const {authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -34,11 +35,12 @@ function App() {
     <Navbar/>
     <Routes>
      <Route  path='/' element={authUser ? <Home/> : <Navigate to='/login' /> }/>
-     <Route  path='/signin' element={<SignupPage/>}/>
+     <Route  path='/signup' element={!authUser ?<SignupPage/> : <Navigate to="/"/>}/>
      <Route  path='/login' element={!authUser ? <LoginPage/> : <Navigate to="/"/>}/>
      <Route  path='/profile' element={ authUser ? <ProfilePage/> : <Navigate to='/login' />}/>
      <Route  path='/settings' element={<SettingsPage/>}/>
     </Routes>
+    <Toaster/>
       
     </>
   )
