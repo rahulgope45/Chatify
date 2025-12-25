@@ -1,11 +1,12 @@
 import cloudinary from "../lib/cloudinary.js";
 import User from "../models/user.model.js";
+import Message from "../models/message.model.js";
 
 export const getUsersForSidebar = async(req, res) =>{
 
     try {
         const loogedInUserId = req.user._id;
-        const filteredUsers = await User.find({ _id: { $ne: loogedInUserId}}.select("-password"));
+        const filteredUsers = await User.find({ _id: { $ne: loogedInUserId}}).select("-password");
 
         res.status(200).json(filteredUsers);
         
@@ -19,7 +20,7 @@ export const getMessages = async(req, res) =>{
         const {id: userToChatid} =req.params
         const myId = req.user._id;
 
-        const messages = await MessageChannel.find({
+        const messages = await Message.find({
             $or:[
                 {senderId: myId , receiverId: userToChatid},
                 {senderId: userToChatid, receiverId: myId},
@@ -45,15 +46,16 @@ export const sendMessage= async(req, res) =>{
             }
 
 
-            const newMessage = new MessageChannel({
+            const newMessage = new Message({
                 senderId,
                 receiverId,
                 text,
                 image : imageUrl,
         })
-        res.status(201).json(newMessage);
+        
 
         await newMessage.save();
+        res.status(201).json(newMessage);
         } catch (error) {
             console.log("Error in sendMessages controller", error.messages);
             
