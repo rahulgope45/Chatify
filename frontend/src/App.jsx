@@ -13,14 +13,15 @@ import {Toaster} from 'react-hot-toast'
 import { useThemeStore } from './store/useThemeStore'
 
 function App() {
-   const {authUser, checkAuth, isCheckingAuth } = useAuthStore();
+   const {authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
    const navigate = useNavigate();
   //Checking user logged in in every refresh 
   useEffect(() => {
   checkAuth()
+  
 }, []);
 
-
+console.log({onlineUsers});
 
 const {theme} = useThemeStore();
 
