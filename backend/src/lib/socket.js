@@ -14,6 +14,11 @@ const  io = new Server(server,{
     
 })
 
+export function getReceiverSocketId(userId){
+    return userSocketMap[userId]
+}
+
+//Online User Check
 const userSocketMap = {};
 
 

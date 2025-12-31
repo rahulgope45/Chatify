@@ -54,6 +54,10 @@ export const useChatStore = create((set,get) => ({
         } catch (error) {
             toast.error("Error in sendMessages")
         }
+    },
+
+    subscribeToMessages: (userId)=> {
+        
     }
 
 
