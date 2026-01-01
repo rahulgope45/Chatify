@@ -7,7 +7,9 @@ export const getUsersForSidebar = async(req, res) =>{
 
     try {
         const loogedInUserId = req.user._id;
-        const filteredUsers = await User.find({ _id: { $ne: loogedInUserId}}).select("-password");
+        const filteredUsers = await User.find({ _id: { $ne: loogedInUserId}})
+        .select("-password")
+        .sort({lastMessageTime: -1}); //selecting and sorting
 
         res.status(200).json(filteredUsers);
         
@@ -63,9 +65,13 @@ export const sendMessage = async (req, res) => {
 
     await newMessage.save();
 
+    const now = new Date();
+    await User.findByIdAndUpdate(senderId , {lastMessageTime: now});
+    await User.findByIdAndUpdate(receiverId, {lastMessageTime: now});
+
   //realtime Fuctionality 
   const receiverSocketId = getReceiverSocketId(receiverId);
-  if(receiverId){
+  if(receiverSocketId){
     io.to(receiverSocketId).emit("newMessage", newMessage);
   }
 
@@ -76,3 +82,4 @@ export const sendMessage = async (req, res) => {
     res.status(500).json({ error: error.message || "Internal server error" });
   }
 };
+

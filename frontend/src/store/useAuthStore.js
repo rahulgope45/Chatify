@@ -103,10 +103,13 @@ export const useAuthStore = create((set, get) => ({
                 userId: authUser._id,
             },
             withCredentials: true,
+            transports: ['websocket', 'polling'], 
         })
         newSocket.on("connect", () => {
             console.log("✅ Socket connected:", newSocket.id);
         });
+
+        newSocket.off("getOnlineUsers");
 
         newSocket.on("getOnlineUsers", (userIds) => {
             console.log("ONLINE USERS 👉", userIds);

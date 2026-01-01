@@ -52,6 +52,8 @@ export const useChatStore = create((set,get) => ({
             set((state) => ({
                 messages: [...state.messages, res.data],
             }))
+
+            get().moveUserToTop(selectedUser._id);
         } catch (error) {
             toast.error("Error in sendMessages")
         }
@@ -70,12 +72,25 @@ export const useChatStore = create((set,get) => ({
             set({
                 messages: [...get().messages,newMessage],
             });
+            get().moveUserToTop(newMessage.senderId);
         })
     },
     
     unsubscribeFromMessages: () => {
       const socket = useAuthStore.getState().socket;
       socket.off("newMessage")
+    },
+
+    moveUserToTop: (userId) => {
+       const {users} = get();
+       const userIndex = users.findIndex(user => user._id === userId);
+
+       if(userIndex > 0){
+        const updatedUsers = [...users];
+        const [user] = updatedUsers.splice(userIndex, 1);
+        updatedUsers.unshift(user);
+        set({users: updatedUsers});
+       }
     },
 
     setSelectedUser: (selectedUser) => set({selectedUser})
