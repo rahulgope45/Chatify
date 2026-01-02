@@ -6,39 +6,49 @@ import messageRoutes from './routes/message.route.js'
 import friendRoutes from './routes/friend.route.js'
 import { connectDB } from './lib/db.js';
 import cors from 'cors'
-import {app,server} from './lib/socket.js'
+import { app, server } from './lib/socket.js'
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config()
 
-const PORT = process.env.PORT || 5000 
-const _dirname = path.resolve();
+const PORT = process.env.PORT || 5000;
 
-app.use(express.json({ limit: "5mb" }));
-app.use(express.urlencoded({ extended: true, limit: "5mb" }));
-app.use(cookieParser())
+// Fix: Proper __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+app.use(cookieParser());
+
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: process.env.NODE_ENV === "production" 
+        ? process.env.CLIENT_URL 
+        : "http://localhost:5173",
     credentials: true
-}
+}));
+
+// API routes - MUST come before static files
+app.use("/api/auth", authRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/friends", friendRoutes);
+
+// Serve static files ONLY in production
+if (process.env.NODE_ENV === "production") {
+    // Correct path: go up from src to backend, then to frontend/dist
+    const frontendDistPath = path.join(__dirname, "../../frontend/dist");
     
-))
+    app.use(express.static(frontendDistPath));
 
-//Making auth
-app.use("/api/auth", authRoutes )
-app.use("/api/messages", messageRoutes )
-app.use("/api/friends", friendRoutes )
-
-if(process.env.NODE_ENV==="production"){
-    app.use(express.static(path.join(_dirname,"../frontend/dist")))
-
-    app.get("*", (req,res)=> {
-        res.sendFile(path.join(_dirname,"../frontend/dist","index.html"));
-    })
+    // Catch-all route for React Router
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(frontendDistPath, "index.html"));
+    });
 }
 
 server.listen(PORT, () => {
-    console.log("Server is running on port "+ PORT)
-    connectDB()
-})
-
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+    connectDB();
+});
