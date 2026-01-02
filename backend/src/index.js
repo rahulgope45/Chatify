@@ -3,6 +3,7 @@ import authRoutes from "./routes/auth.route.js"
 import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
 import messageRoutes from './routes/message.route.js'
+import friendRoutes from './routes/friend.route.js'
 import { connectDB } from './lib/db.js';
 import cors from 'cors'
 import {app,server} from './lib/socket.js'
@@ -26,6 +27,7 @@ app.use(cors({
 //Making auth
 app.use("/api/auth", authRoutes )
 app.use("/api/messages", messageRoutes )
+app.use("/api/friends", friendRoutes )
 
 server.listen(PORT, () => {
     console.log("Server is running on port "+ PORT)
