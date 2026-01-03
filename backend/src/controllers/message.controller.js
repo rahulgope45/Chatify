@@ -89,10 +89,11 @@ export const sendMessage = async (req, res) => {
         await User.findByIdAndUpdate(senderId, { lastMessageTime: now });
         await User.findByIdAndUpdate(receiverId, { lastMessageTime: now });
 
-        // Realtime functionality
+        // Emit to receiver's socket
         const receiverSocketId = getReceiverSocketId(receiverId);
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("newMessage", newMessage);
+            console.log("✅ Message emitted to receiver:", receiverId);
         }
 
         res.status(201).json(newMessage);
