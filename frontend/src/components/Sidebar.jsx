@@ -13,6 +13,10 @@ function Sidebar() {
         getUsers()
     }, [getUsers])
 
+    useEffect(() => {
+        console.log("👥 Sidebar - Online users updated:", onlineUsers);
+    }, [onlineUsers]);
+
     // Filter users based on online status
     const filteredUsers = showOnlineOnly 
         ? users.filter(user => onlineUsers.includes(user._id)) 

@@ -4,7 +4,6 @@ import { axiosInstances } from '../lib/axios.js';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 
-// Fix: import.meta.env.MODE
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const useAuthStore = create((set, get) => ({
@@ -18,12 +17,12 @@ export const useAuthStore = create((set, get) => ({
 
     checkAuth: async () => {
         try {
-            const res = await axiosInstances.get("/auth/check")  // /auth/check not auth/check
+            const res = await axiosInstances.get("/auth/check")
             set({ authUser: res.data })
-            console.log(res.data)
+            console.log("✅ Auth user:", res.data)
             get().connectSocket()
         } catch (error) {
-            console.log("Error in authCheck", error)
+            console.log("❌ Error in authCheck", error)
             set({ authUser: null })
         } finally {
             set({ isCheckingAuth: false });
@@ -84,30 +83,47 @@ export const useAuthStore = create((set, get) => ({
     },
 
     connectSocket: () => {
-        const { authUser } = get()
-        if (!authUser || get().socket?.connected) return;
+        const { authUser, socket } = get();
+        
+        // Don't create a new socket if one already exists
+        if (!authUser || socket?.connected) {
+            console.log("⚠️ Socket already connected or no auth user");
+            return;
+        }
+        
+        console.log("🔌 Connecting socket for user:", authUser._id);
         
         const newSocket = io(BASE_URL, {
             query: {
                 userId: authUser._id,
             },
             withCredentials: true,
-            transports: ['websocket', 'polling'], 
-        })
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 5
+        });
         
         newSocket.on("connect", () => {
             console.log("✅ Socket connected:", newSocket.id);
         });
 
-        newSocket.off("getOnlineUsers");
-
+        // IMPORTANT: Only set listener once, don't remove it
         newSocket.on("getOnlineUsers", (userIds) => {
-            console.log("📡 ONLINE USERS 👉", userIds);
+            console.log("📡 Online users received:", userIds);
             set({ onlineUsers: userIds });
         });
 
         newSocket.on("connect_error", (error) => {
             console.error("❌ Socket connection error:", error);
+        });
+
+        newSocket.on("disconnect", (reason) => {
+            console.log("🔴 Socket disconnected:", reason);
+        });
+
+        newSocket.on("reconnect", (attemptNumber) => {
+            console.log("🔄 Socket reconnected after", attemptNumber, "attempts");
         });
 
         set({ socket: newSocket });
@@ -116,8 +132,9 @@ export const useAuthStore = create((set, get) => ({
     disconnectSocket: () => {
         const socket = get().socket;
         if (socket?.connected) {
+            console.log("🔌 Disconnecting socket");
             socket.disconnect();
-            set({ socket: null });
+            set({ socket: null, onlineUsers: [] });
         }
     }
 }));
