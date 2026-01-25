@@ -16,6 +16,7 @@ const io = new Server(server, {
             const allowedOrigins = [
                 "http://localhost:5173",
                 'https://chatify-nine-fawn.vercel.app',
+                '*'
             ];
 
             if (allowedOrigins.includes(origin)) {

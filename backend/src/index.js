@@ -24,7 +24,8 @@ app.use(cookieParser());
 
 const allowedOrigins = [
     'http://localhost:5173',
-    'https://chatify-nine-fawn.vercel.app'
+    'https://chatify-nine-fawn.vercel.app',
+    '*'
 ]
 
 app.use(cors({
@@ -39,6 +40,8 @@ app.use(cors({
     return callback(null, true); // 👈 IMPORTANT: don't block sockets
   },
   credentials: true,
+  methods: ['GET','PUT','POST','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
 }));
 
 // API routes - MUST come before static files
