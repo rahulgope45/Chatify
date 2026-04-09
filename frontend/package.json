@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
-    "axios": "^1.13.2",
+    "axios": "1.13.2",
     "baseline-browser-mapping": "^2.9.10",
     "chatify": "file:..",
     "lucide-react": "^0.562.0",
